@@ -1,20 +1,22 @@
-import express from "express";
-import helmet from "helmet";
-import cors from "cors";
-import "dotenv/config";
-import connectDB from './utils/connection.js'
-import { globalRouter } from "./routes";
+import express from 'express';
+import helmet from 'helmet';
+import cors from 'cors';
+import globalRouter from './router';
 
-// Esta es nuestra aplicación
-export const app = express();
+//esta es nuestra aplicacion
+const app = express();
 
-// Middlewares
+//middlewares
 app.use(express.json());
 app.use(
-  helmet({
-    crossOriginResourcePolicy: false,
-  })
-);
+    helmet({
+        crossOriginEmbedderPolicy:false
+    })
+)
 app.use(cors());
 
-app.use("/", globalRouter);
+app.use('/', globalRouter);
+
+
+
+export default app;
