@@ -6,7 +6,7 @@ dotenv.config()
 export const connectDB = async (): Promise<void> => {
 
     try {
-        await mongoose.connect("mongodb://localhost:27017/zonarunning");
+        await mongoose.connect("mongodb://localhost/zonaRunning" );
 
         console.log('Connected to MongoDb');
 
