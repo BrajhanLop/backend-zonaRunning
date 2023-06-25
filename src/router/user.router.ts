@@ -11,4 +11,4 @@ routerUser.route('/')
 routerUser.route('/:id')
         .get(getOne) //getting one user
         .put(update) //updating one user
-        .delete(remove) //removing one user
+        .delete(remove) //removing one user 
