@@ -1,4 +1,4 @@
-import express from 'express';
+import express, {Request, Response} from 'express';
 import helmet from 'helmet';
 import cors from 'cors';
 import globalRouter from './router';
@@ -18,6 +18,9 @@ app.use(
 app.use(cors());
 
 app.use('/api/v1', globalRouter);
+app.get("/", (_req:Request, res:Response) => {
+        return res.send("Welcome to express")
+})
 
 //Middlewares despues de las rutas
 app.use(errorHandler)
