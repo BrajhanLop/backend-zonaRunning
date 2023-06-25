@@ -1,6 +1,7 @@
 import { Request, Response } from 'express'
 import { catchError } from '../utils/catchError'
 import { inteUser } from '../utils/utilIntefaces'
+import sendEmail from '../utils/sentEmail';
 
 import User from '../models/User'
 import mongoose from 'mongoose'
@@ -42,6 +43,19 @@ export const create = catchError(async (req: Request, res: Response) => {
         res.sendStatus(404)
 
     } else {
+
+        const url:string = "https:google/very_email/code";
+
+        await sendEmail({
+            to:'miltonmercado92@gmail.com',
+            subject: 'Verificacion de cuenta',
+            html:`
+                <h2>User Creating</h2>
+                <a href=${url}>Click me!</a>
+            `
+        })
+
+
         res.sendStatus(201)
     }
 
