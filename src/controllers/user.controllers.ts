@@ -1,7 +1,10 @@
 import { Request, Response } from 'express'
 import { catchError } from '../utils/catchError'
-import { inteUser } from '../utils/utilIntefaces'
+import { inteLogin, inteUser } from '../utils/utilIntefaces'
 import sendEmail from '../utils/sentEmail';
+import bcrypt from 'bcrypt';
+
+import jwt from 'jsonwebtoken';
 
 import User from '../models/User'
 import mongoose from 'mongoose'
@@ -43,6 +46,8 @@ export const create = catchError(async (req: Request, res: Response) => {
         res.sendStatus(404)
 
     } else {
+
+        
 
         const url:string = "https:google/very_email/code";
 
@@ -137,4 +142,20 @@ export const update = catchError(async (req: Request, res: Response) => {
 
    
 
+})
+
+//login post -> /users/login
+export const login = catchError(async (req:Request, res:Response)=> {
+
+    const {email, password}:inteLogin = req.body;
+
+    const user = await User.findOne({Email : email})
+
+    if(!user){
+        res.status(401).json({error:"Envalid Credentials"});
+    }else{
+
+        
+
+    }
 })

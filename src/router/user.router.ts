@@ -8,6 +8,8 @@ routerUser.route('/')
         .get(getAll) //Getting all users
         .post(create) // Creating a new user
 
+
+        
 routerUser.route('/:id')
         .get(getOne) //getting one user
         .put(update) //updating one user

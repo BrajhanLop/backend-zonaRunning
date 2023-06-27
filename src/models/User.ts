@@ -18,4 +18,11 @@ const UserSchema:Schema = new Schema({
     role:{type:String, require:true}
 });
 
+
+UserSchema.methods.toJSON = function (){
+    const userObject = this.toObject();
+  delete userObject.password;
+  return userObject;
+}
+
 export default mongoose.model<IUser>('User', UserSchema);

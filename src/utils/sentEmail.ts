@@ -7,19 +7,23 @@ interface EmailOptions{
 
 }
 
-const sendEmail = (options:EmailOptions): Promise<any> => new Promise((resolve, reject)=>{
+const sendEmail = async (options:EmailOptions): Promise<any> => new Promise((resolve, reject)=>{
 
+   
  const transporter = nodemailer.createTransport({
-    service:'gmail',
+    service:"gmail",
     auth:{
-        user:"davidmercado7082@gmail.com",
-        pass:"uvacbybnyflhtvfl"
+        user:"miltonmercado92@gmail.com",
+        pass:"wagffvxdhiafzdno"
+    },
+    tls: {
+        rejectUnauthorized: false
     },
     secure:false
  });
 
  const mailOptions = {
-    from:"davidmercado7082@gmail.com",
+    from:"miltonmercado92@gmail.com",
     ...options
  }  
 
@@ -35,4 +39,7 @@ const sendEmail = (options:EmailOptions): Promise<any> => new Promise((resolve, 
 
 })
 
+
 export default sendEmail;
+
+

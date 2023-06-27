@@ -13,3 +13,8 @@ export interface inteService {
     duration:string,
     price:number,
 }
+
+export interface inteLogin {
+    email:string,
+    password:string
+}
