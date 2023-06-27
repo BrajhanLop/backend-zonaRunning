@@ -1,10 +1,10 @@
 import { Request, Response } from 'express'
 import { catchError } from '../utils/catchError'
-import { inteLogin, inteUser } from '../utils/utilIntefaces'
+import { inteUser } from '../utils/utilIntefaces'
 import sendEmail from '../utils/sentEmail';
 import bcrypt from 'bcrypt';
-
-import jwt from 'jsonwebtoken';
+import crypto from 'crypto';
+//import jwt from 'jsonwebtoken';
 
 import User from '../models/User'
 import mongoose from 'mongoose'
@@ -14,7 +14,8 @@ import mongoose from 'mongoose'
 export const getAll = catchError(async (_req: Request, res: Response) => {
 
     const user = await User.find();
-
+    
+   
     res.json(user)
 
 })
@@ -34,10 +35,11 @@ export const create = catchError(async (req: Request, res: Response) => {
         First_name,
         Last_name,
         Email,
-        Password,
+        Password : await bcrypt.hash(Password, 10),
         role
     }
 
+  
     const user = new User(body);
 
     await user.save()
@@ -47,9 +49,9 @@ export const create = catchError(async (req: Request, res: Response) => {
 
     } else {
 
-        
+        const code:Buffer = crypto.randomBytes(64)
 
-        const url:string = "https:google/very_email/code";
+        const url:string = `${res.body.frontBaseUrl}/very_email/${code}`;
 
         await sendEmail({
             to:'miltonmercado92@gmail.com',
@@ -145,17 +147,17 @@ export const update = catchError(async (req: Request, res: Response) => {
 })
 
 //login post -> /users/login
-export const login = catchError(async (req:Request, res:Response)=> {
+// export const login = catchError(async (req:Request, res:Response)=> {
 
-    const {email, password}:inteLogin = req.body;
+//     const {email, password}:inteLogin = req.body;
 
-    const user = await User.findOne({Email : email})
+//     const user = await User.findOne({Email : email})
 
-    if(!user){
-        res.status(401).json({error:"Envalid Credentials"});
-    }else{
+//     if(!user){
+//         res.status(401).json({error:"Envalid Credentials"});
+//     }else{
 
         
 
-    }
-})
+//     }
+// })

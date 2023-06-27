@@ -16,14 +16,16 @@ interface CustomRequest extends Request {
   };
 }
 
-const verifyJWT = (req: CustomRequest, res: Response, next: NextFunction): void => {
-  const authHeader:string = req.headers.authorization || req.headers.Authorization;
+const verifyJWT = (req: CustomRequest, res: Response, next: NextFunction): Response => {
+    
+  const authHeader:string | string[] | undefined = req.headers.authorization || req.headers.Authorization;
 
-  if (!Array.isArray(authHeader) && !authHeader.startsWith('Bearer ')) {
-     res.sendStatus(401);
+  if(typeof authHeader === 'string'){
+    if (!Array.isArray(authHeader) && !authHeader.startsWith('Bearer ')) {
+        return res.sendStatus(401);
+      }
   }
-
-
+  
 
   let token: string = '';
 
@@ -54,8 +56,11 @@ const verifyJWT = (req: CustomRequest, res: Response, next: NextFunction): void 
         __v?: number;
       };
       next();
+     
     }
   });
+
+  return res.sendStatus(200)
 };
 
 export default verifyJWT;
