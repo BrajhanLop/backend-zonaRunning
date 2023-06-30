@@ -1,11 +1,12 @@
-import { Router } from 'express'
+import {Router} from 'express';
+import { routerUser } from './user.router';
+import { routerService } from './service.router';
 
-export const globalRouter = Router()
+const globalRouter = Router();
 
-// colocar las rutas aquí
-globalRouter.get('/', (_req, res) => {
-    res.send("Welcome to express");
-});
-
+//rutas
+globalRouter.use("/users", routerUser)
+globalRouter.use("/services", routerService)
 
 
+export default globalRouter;

@@ -1,7 +1,7 @@
 import express, {Request, Response} from 'express';
 import helmet from 'helmet';
 import cors from 'cors';
-import globalRouter from './router';
+import globalRouter from './routes';
 import errorHandler  from './utils/errorHandler';
 
 //esta es nuestra aplicacion

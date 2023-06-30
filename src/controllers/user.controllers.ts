@@ -1,13 +1,13 @@
 import { Request, Response } from 'express'
 import { catchError } from '../utils/catchError'
-import { inteUser } from '../utils/utilIntefaces'
+import { inteLogin, inteUser } from '../utils/utilIntefaces'
 import sendEmail from '../utils/sentEmail';
 import bcrypt from 'bcrypt';
-import crypto from 'crypto';
-//import jwt from 'jsonwebtoken';
-
+import jwt from 'jsonwebtoken';
+import randomCode from '../utils/randomCode'
 import User from '../models/User'
 import mongoose from 'mongoose'
+import EmailCode from '../models/EmailCode';
 
 
 //GET all-> /users ------------ public EndPoint 
@@ -31,6 +31,8 @@ export const create = catchError(async (req: Request, res: Response) => {
         role
     }: inteUser = req.body;
 
+    //const frontBaseUrl:string = req.body.frontBaseUrl;
+
     const body: inteUser = {
         First_name,
         Last_name,
@@ -39,7 +41,8 @@ export const create = catchError(async (req: Request, res: Response) => {
         role
     }
 
-  
+    const frontBaseUrl:string = req.body.frontBaseUrl;
+
     const user = new User(body);
 
     await user.save()
@@ -47,23 +50,27 @@ export const create = catchError(async (req: Request, res: Response) => {
     if (!user) {
         res.sendStatus(404)
 
-    } else {
+    }else {
 
-        const code:Buffer = crypto.randomBytes(64)
-
-        const url:string = `${res.body.frontBaseUrl}/very_email/${code}`;
+        const code:string = randomCode();
+       
+        const url:string = `${frontBaseUrl}/very_email/${code}`;
 
         await sendEmail({
             to:'miltonmercado92@gmail.com',
             subject: 'Verificacion de cuenta',
             html:`
                 <h2>User Creating</h2>
-                <a href=${url}>Click me!</a>
+                <a href='${url}'>Click me!</a> 
             `
         })
 
+        const bodyCode:object = {code, userId : user._id }
 
-        res.sendStatus(201)
+        const email = new EmailCode(bodyCode)
+        await email.save();
+       
+        res.status(201).json(user);
     }
 
 
@@ -147,17 +154,65 @@ export const update = catchError(async (req: Request, res: Response) => {
 })
 
 //login post -> /users/login
-// export const login = catchError(async (req:Request, res:Response)=> {
+export const login = catchError(async (req:Request, res:Response)=> {
 
-//     const {email, password}:inteLogin = req.body;
+    const {email, password}:inteLogin = req.body;
 
-//     const user = await User.findOne({Email : email})
+    const user = await User.findOne({Email : email})
 
-//     if(!user){
-//         res.status(401).json({error:"Envalid Credentials"});
-//     }else{
+    if(!user){
+        res.status(401).json({error:"Envalid Credentials"});
+    }else{
 
-        
+        const isValidPassword:boolean = await bcrypt.compare(password, user.Password)
 
-//     }
-// })
+        if(isValidPassword){
+
+            const token:string = jwt.sign(
+                {user},
+                <string>process.env.TOKEN_SECRET,
+                {expiresIn: '1d'}
+            )
+
+
+            res.status(200).json({user, token})
+        }else{
+            res.status(401).json({error:"Envalid Credentials"});
+        }
+
+
+    }
+})
+
+//GET -> /users/verify/:code --- public endpoint
+export const verifyCode = catchError(async (req:Request, res:Response) =>{
+ 
+    const {code} = req.params;
+    
+    const codeUser = await EmailCode.findOne({code})
+
+    if(!codeUser){
+        res.sendStatus(401)
+    }else{
+        const body:object = {habilitado:true}
+
+        const userUpdate = await User.findByIdAndUpdate({_id: codeUser.userId},body, {new:true})
+    
+        await codeUser.deleteOne()
+    
+        res.json(userUpdate)
+    }
+
+});
+
+//GET -> /users/me --- public endpoint
+interface CustomRequest extends Request {
+    user?: object;
+  }
+  
+  export const logged = catchError(async (req: CustomRequest, res: Response) => {
+    const user: object | undefined = req.user;
+
+    res.send(user)
+
+  });
