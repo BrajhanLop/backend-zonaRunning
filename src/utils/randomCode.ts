@@ -9,7 +9,7 @@ function generateRandomCode():string {
     }
   
     return result;
-  }
+  } 
 
 
   export default generateRandomCode;
