@@ -57,7 +57,7 @@ export const create = catchError(async (req: Request, res: Response) => {
         const url:string = `${frontBaseUrl}/very_email/${code}`;
 
         await sendEmail({
-            to:'miltonmercado92@gmail.com',
+            to: Email,
             subject: 'Verificacion de cuenta',
             html:`
                 <h2>User Creating</h2>
@@ -211,8 +211,104 @@ interface CustomRequest extends Request {
   }
   
   export const logged = catchError(async (req: CustomRequest, res: Response) => {
-    const user: object | undefined = req.user;
+   
+   if(req.user){
 
-    res.send(user)
+        const{ _id} = req.user as {
+            _id?: string;
+            First_name?: string;
+            Last_name?: string;
+            Email?: string;
+            Password?: string;
+            habilitado?: boolean;
+            __v?: number;
+        };
+
+        const user = await User.findById({_id})
+        res.send(user)
+   }else{
+    res.sendStatus(204)
+   }
+   
 
   });
+
+
+  // working with the reset password
+  //reset_password ---------------- public EndPoint
+  export const resetPassword = catchError(async (req: Request, res: Response) => {
+
+    interface reqBody {
+        email:string;
+        frontBaseUrl:string;
+    }
+
+    const {email:userEmail, frontBaseUrl}:reqBody = req.body;
+
+    const user = await User.findOne({Email:userEmail})
+     
+    if(user){
+        const code:string = `password ${randomCode()}`
+
+        const url = `${frontBaseUrl}/reset_password/${code}`
+    
+        await sendEmail({
+            to: userEmail,
+            subject: 'solicitud de cambio de contraseña',
+            html:`
+                <h2>Cambiar contraseña</h2>
+                <a href='${url}'>Click me!</a> 
+            `
+        })
+
+        const bodyCode:object = {code, userId : user._id }
+
+        const email = new EmailCode(bodyCode)
+        await email.save();
+
+        res.json(user)
+
+    }else{
+        res.sendStatus(401)
+    }
+
+  })
+
+    //Get /users/reset_password/:code ---- public enpoint
+    export const updatePassword = catchError(async (req:Request, res:Response )=> {
+        interface bodyParse {
+            code?:string;
+            password?:string;
+        }
+            const {code}:bodyParse = req.params;
+    
+            const {password}:bodyParse = req.body;
+    
+            const userCode = await EmailCode.findOne({code})
+    
+            if(userCode && password){
+    
+                const hashPassword = await bcrypt.hash(password, 10);
+    
+                const body = {Password : hashPassword}
+    
+                const user = await User.findByIdAndUpdate(
+                    {_id: userCode.userId},
+                    body,
+                    {new:true}
+                )
+    
+                if(!user){
+                    res.status(404).json({message:"User not found"})
+                }else{
+                    await userCode.deleteOne();
+                    res.json(user)
+                }
+                
+            }else{
+                res.status(404).json({message:"User not found"})
+            }
+    
+      })
+
+
