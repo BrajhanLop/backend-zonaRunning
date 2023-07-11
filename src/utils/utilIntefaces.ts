@@ -4,6 +4,7 @@ export interface inteUser  {
     Last_name:string,
     Email:string,
     Password:string,
+    Profession: string,
     role:string
 }
 
