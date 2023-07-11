@@ -1,29 +1,29 @@
-import mongoose,{Schema, Document} from 'mongoose'
+import mongoose, { Schema, Document } from 'mongoose'
 
-export interface IUser extends Document{
-    First_name:string,
-    Last_name:string,
-    Email:string,
-    Password:string,
-    habilitado:boolean,
-    role:string
+export interface IUser extends Document {
+    First_name: string,
+    Last_name: string,
+    Email: string,
+    Password: string,
+    habilitado: boolean,    
+    role: string
 };
 
-const UserSchema:Schema = new Schema({
-    First_name:{type:String, required:true},
-    Last_name:{type: String, required: true},
-    Email:{type: String, required: true, unique:true},
-    Password:{type: String, required: true},
-    habilitado:{type: Boolean, default: false},
-    role:{type:String, require:true}
+const UserSchema: Schema = new Schema({
+    First_name: { type: String, required: true },
+    Last_name: { type: String, required: true },
+    Email: { type: String, required: true, unique: true },
+    Password: { type: String, required: true },
+    habilitado: { type: Boolean, default: false },   
+    role: { type: String, require: true }
 });
 
 
-UserSchema.methods.toJSON = function (){
+UserSchema.methods.toJSON = function () {
     const userObject = this.toObject();
-  delete userObject.Password;
+    delete userObject.Password;
 
-  return userObject;
+    return userObject;
 }
 
 
