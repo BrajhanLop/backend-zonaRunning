@@ -16,6 +16,9 @@ const UserSchema:Schema = new Schema({
     Password:{type: String, required: true},
     habilitado:{type: Boolean, default: false},
     role:{type:String, require:true}
+},
+{
+    timestamps:true
 });
 
 

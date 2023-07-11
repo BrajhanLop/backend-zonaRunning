@@ -6,7 +6,7 @@ export const routerService = Router();
 
 routerService.route('/')
     .get(getAll) //getting all services
-    .post(create) //Creating a new service
+    .post(create) //Creating a new service 
 
 routerService.route('/:id')
     .get(getOne) //getting one service

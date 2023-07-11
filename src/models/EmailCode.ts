@@ -7,7 +7,7 @@ export interface IEmailCode extends Document{
 
 const EmailCodeSchema = new Schema({
     code:{type:String, require:true},
-    userId: {type:mongoose.Schema.Types.ObjectId, ref: 'User'}
+    userId: {type:mongoose.Schema.Types.ObjectId, ref: 'users'}
 })
 
 
