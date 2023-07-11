@@ -28,35 +28,36 @@ exports.getAll = (0, catchError_1.catchError)((_req, res) => __awaiter(void 0, v
 }));
 //Post -> /users ------------ public EndPoint 
 exports.create = (0, catchError_1.catchError)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { First_name, Last_name, Email, Password, role } = req.body;
+    const { First_name, Last_name, Email, Password, Profession, role } = req.body;
     //const frontBaseUrl:string = req.body.frontBaseUrl;
     const body = {
         First_name,
         Last_name,
         Email,
         Password: yield bcrypt_1.default.hash(Password, 10),
+        Profession,
         role
     };
-    const frontBaseUrl = req.body.frontBaseUrl;
+    // const frontBaseUrl: string = req.body.frontBaseUrl;
     const user = new User_1.default(body);
     yield user.save();
     if (!user) {
         res.sendStatus(404);
     }
     else {
-        const code = (0, randomCode_1.default)();
-        const url = `${frontBaseUrl}/very_email/${code}`;
-        yield (0, sentEmail_1.default)({
-            to: Email,
-            subject: 'Verificacion de cuenta',
-            html: `
-                <h2>User Creating</h2>
-                <a href='${url}'>Click me!</a> 
-            `
-        });
-        const bodyCode = { code, userId: user._id };
-        const email = new EmailCode_1.default(bodyCode);
-        yield email.save();
+        // const code: string = randomCode();
+        // const url: string = `${frontBaseUrl}/very_email/${code}`;
+        // await sendEmail({
+        //     to: Email,
+        //     subject: 'Verificacion de cuenta',
+        //     html: `
+        //         <h2>User Creating</h2>
+        //         <a href='${url}'>Click me!</a> 
+        //     `
+        // })
+        // const bodyCode: object = { code, userId: user._id }
+        // const email = new EmailCode(bodyCode)
+        // await email.save();
         res.status(201).json(user);
     }
 }));
@@ -67,7 +68,7 @@ exports.getOne = (0, catchError_1.catchError)((req, res) => __awaiter(void 0, vo
         res.status(404).json({ message: 'ID invalid' });
     }
     else {
-        const user = yield User_1.default.findById(id);
+        const user = yield User_1.default.findById(id).populate('profesionales');
         res.json(user);
     }
 }));
