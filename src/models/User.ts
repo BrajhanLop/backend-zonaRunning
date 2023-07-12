@@ -1,17 +1,13 @@
 import mongoose, { Schema, Document } from 'mongoose'
 
-<<<<<<< HEAD
 
 
-=======
->>>>>>> 84627d5512e05838a7ae26d41f00d382556b5a33
 export interface IUser extends Document {
     First_name: string,
     Last_name: string,
     Email: string,
     Password: string,
     habilitado: boolean,    
-<<<<<<< HEAD
     role: string,
     avatar:Schema.Types.ObjectId
 };
@@ -27,18 +23,6 @@ const UserSchema:Schema = new Schema({
 },
 {
     timestamps:true
-=======
-    role: string
-};
-
-const UserSchema: Schema = new Schema({
-    First_name: { type: String, required: true },
-    Last_name: { type: String, required: true },
-    Email: { type: String, required: true, unique: true },
-    Password: { type: String, required: true },
-    habilitado: { type: Boolean, default: false },   
-    role: { type: String, require: true }
->>>>>>> 84627d5512e05838a7ae26d41f00d382556b5a33
 });
 
 
