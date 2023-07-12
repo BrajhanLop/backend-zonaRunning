@@ -17,8 +17,17 @@ const catchError_1 = require("../utils/catchError");
 const Service_1 = __importDefault(require("../models/Service"));
 const mongoose_1 = __importDefault(require("mongoose"));
 //Get all services -------- public endPoint
-exports.getAll = (0, catchError_1.catchError)((_req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const services = yield Service_1.default.find();
+exports.getAll = (0, catchError_1.catchError)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { title } = req.query;
+    let query = {};
+    if (title) {
+        query = {
+            title: {
+                $eq: title
+            }
+        };
+    }
+    const services = yield Service_1.default.find(query);
     res.json(services);
 }));
 //Post one services ---------- public endPoint

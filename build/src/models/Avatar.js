@@ -24,21 +24,8 @@ var __importStar = (this && this.__importStar) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = __importStar(require("mongoose"));
-;
-const UserSchema = new mongoose_1.Schema({
-    First_name: { type: String, required: true },
-    Last_name: { type: String, required: true },
-    Email: { type: String, required: true, unique: true },
-    Password: { type: String, required: true },
-    habilitado: { type: Boolean, default: false },
-    role: { type: String, require: true },
-    avatar: { type: mongoose_1.Schema.Types.ObjectId, ref: 'Avatar' }
-}, {
-    timestamps: true
+const AvatarSchema = new mongoose_1.Schema({
+    url: String,
+    filename: String,
 });
-UserSchema.methods.toJSON = function () {
-    const userObject = this.toObject();
-    delete userObject.Password;
-    return userObject;
-};
-exports.default = mongoose_1.default.model('User', UserSchema);
+exports.default = mongoose_1.default.model('Avatar', AvatarSchema);
