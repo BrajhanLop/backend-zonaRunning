@@ -3,6 +3,7 @@ import helmet from 'helmet';
 import cors from 'cors';
 import globalRouter from './routes';
 import errorHandler  from './utils/errorHandler';
+import path from 'path';
 
 //esta es nuestra aplicacion
 const app = express();
@@ -16,7 +17,7 @@ app.use(
     })
 )
 app.use(cors());
-
+app.use(express.static(path.join(__dirname, 'public')));
 app.use('/api/v1', globalRouter);
 app.get("/", (_req:Request, res:Response) => {
         return res.send("Welcome to express")

@@ -6,9 +6,22 @@ import mongoose from 'mongoose';
 
 
 //Get all services -------- public endPoint
-export const getAll = catchError(async (_req:Request, res:Response)=> {
 
-     const services = await Service.find()
+export const getAll = catchError(async (req:Request, res:Response): Promise<void> => {
+    
+    const {title} = req.query;
+
+    let query = {};
+
+    if(title) {
+        query = {
+            title:{
+                $eq: title
+            }
+        }
+    }
+   
+     const services = await Service.find(query)
 
      res.json(services) 
 

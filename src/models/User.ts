@@ -1,12 +1,15 @@
-import mongoose,{Schema, Document} from 'mongoose'
+import mongoose, { Schema, Document } from 'mongoose'
 
-export interface IUser extends Document{
-    First_name:string,
-    Last_name:string,
-    Email:string,
-    Password:string,
-    habilitado:boolean,
-    role:string
+
+
+export interface IUser extends Document {
+    First_name: string,
+    Last_name: string,
+    Email: string,
+    Password: string,
+    habilitado: boolean,    
+    role: string,
+    avatar:Schema.Types.ObjectId
 };
 
 const UserSchema:Schema = new Schema({
@@ -15,18 +18,19 @@ const UserSchema:Schema = new Schema({
     Email:{type: String, required: true, unique:true},
     Password:{type: String, required: true},
     habilitado:{type: Boolean, default: false},
-    role:{type:String, require:true}
+    role:{type:String, require:true},
+    avatar:{type:Schema.Types.ObjectId, ref:'Avatar'}
 },
 {
     timestamps:true
 });
 
 
-UserSchema.methods.toJSON = function (){
+UserSchema.methods.toJSON = function () {
     const userObject = this.toObject();
-  delete userObject.Password;
+    delete userObject.Password;
 
-  return userObject;
+    return userObject;
 }
 
 
