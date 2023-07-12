@@ -13,7 +13,11 @@ import EmailCode from '../models/EmailCode';
 //GET all-> /users ------------ public EndPoint 
 export const getAll = catchError(async (_req: Request, res: Response) => {
 
+<<<<<<< HEAD
     const user = await User.find().populate('avatar')
+=======
+    const user = await User.find()
+>>>>>>> 84627d5512e05838a7ae26d41f00d382556b5a33
 
 
     res.json(user)
@@ -88,7 +92,11 @@ export const getOne = catchError(async (req: Request, res: Response) => {
         res.status(404).json({ message: 'ID invalid' });
     } else {
 
+<<<<<<< HEAD
         const user = await User.findById(id).populate(['profesionales', 'Avatar']);
+=======
+        const user = await User.findById(id).populate('profesionales');
+>>>>>>> 84627d5512e05838a7ae26d41f00d382556b5a33
 
         res.json(user)
 
@@ -306,6 +314,15 @@ export const updatePassword = catchError(async (req: Request, res: Response) => 
             await userCode.deleteOne();
             res.json(user)
         }
+<<<<<<< HEAD
+=======
+
+    } else {
+        res.status(404).json({ message: "User not found" })
+    }
+
+})
+>>>>>>> 84627d5512e05838a7ae26d41f00d382556b5a33
 
     } else {
         res.status(404).json({ message: "User not found" })
