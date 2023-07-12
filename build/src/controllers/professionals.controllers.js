@@ -16,7 +16,12 @@ exports.buscarProfesiones = exports.deleteProfesionales = exports.updateProfesio
 const professionals_1 = __importDefault(require("../models/professionals"));
 const getAllProfesionales = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const profesionales = yield professionals_1.default.find().populate('user');
+        const profesionales = yield professionals_1.default.find()
+            .populate('user')
+            .populate({
+            path: 'user',
+            populate: { path: 'avatar' }
+        });
         res.json(profesionales);
     }
     catch (error) {
@@ -28,8 +33,12 @@ exports.getAllProfesionales = getAllProfesionales;
 const getProfesionalesById = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { id } = req.params;
     try {
-        const profesional = yield professionals_1.default.findById(id).populate('user');
-        ;
+        const profesional = yield professionals_1.default.findById(id)
+            .populate('user')
+            .populate({
+            path: 'user',
+            populate: { path: 'avatar' }
+        });
         if (!profesional) {
             res.status(404).json({ error: 'Profesional no encontrado.' });
         }
@@ -90,7 +99,12 @@ const buscarProfesiones = (req, res) => __awaiter(void 0, void 0, void 0, functi
     const { profesion } = req.params;
     try {
         if (profesion) {
-            const especialidades = yield professionals_1.default.find({ especialidad: profesion }).populate('user');
+            const especialidades = yield professionals_1.default.find({ especialidad: profesion })
+                .populate('user')
+                .populate({
+                path: 'user',
+                populate: { path: 'avatar' }
+            });
             res.json(especialidades);
         }
         else {
