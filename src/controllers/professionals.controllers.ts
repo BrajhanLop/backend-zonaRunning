@@ -25,7 +25,12 @@ export const getProfesionalesById = async (req: Request, res: Response): Promise
 
   
   try {
-    const profesional = await ProfessionModel.findById(id).populate('user');;
+    const profesional = await ProfessionModel.findById(id)
+            .populate('user')
+            .populate({
+                path: 'user',
+                populate: {path: 'avatar'}
+            });
     if (!profesional) {
       res.status(404).json({ error: 'Profesional no encontrado.' });
     } else {
@@ -85,7 +90,12 @@ export const buscarProfesiones = async (req: Request, res: Response): Promise<vo
   
   try {
     if (profesion) {
-      const especialidades = await ProfessionModel.find({ especialidad: profesion }).populate('user');
+      const especialidades = await ProfessionModel.find({ especialidad: profesion })
+                .populate('user')
+                .populate({
+                    path: 'user',
+                    populate: {path: 'avatar'}
+                });
       res.json(especialidades);
     } else {
       const profesiones = await ProfessionModel.find();
