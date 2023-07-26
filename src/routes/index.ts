@@ -7,10 +7,11 @@ import { routerAvatar } from './avatar.router';
 const globalRouter = Router() ;
 
 //rutas
-globalRouter.use('/professionals', routerProfessionals)
-globalRouter.use("/users", routerUser)
-globalRouter.use("/services", routerService)
-globalRouter.use('/avatars', routerAvatar)
+globalRouter.use('/professionals', routerProfessionals);
+globalRouter.use("/users", routerUser);
+globalRouter.use("/services", routerService);
+globalRouter.use('/avatars', routerAvatar);
+globalRouter.use('/availability');
 
 
 export default globalRouter;

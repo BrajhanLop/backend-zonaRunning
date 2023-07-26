@@ -26,6 +26,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = __importStar(require("mongoose"));
 const EmailCodeSchema = new mongoose_1.Schema({
     code: { type: String, require: true },
-    userId: { type: mongoose_1.default.Schema.Types.ObjectId, ref: 'User' }
+    userId: { type: mongoose_1.default.Schema.Types.ObjectId, ref: 'users' }
 });
 exports.default = mongoose_1.default.model('EmailCode', EmailCodeSchema);

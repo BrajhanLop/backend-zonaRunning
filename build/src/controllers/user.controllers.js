@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.updatePassword = exports.resetPassword = exports.logged = exports.verifyCode = exports.login = exports.update = exports.remove = exports.getOne = exports.create = exports.getAll = void 0;
+exports.setAvatar = exports.updatePassword = exports.resetPassword = exports.logged = exports.verifyCode = exports.login = exports.update = exports.remove = exports.getOne = exports.create = exports.getAll = void 0;
 const catchError_1 = require("../utils/catchError");
 const sentEmail_1 = __importDefault(require("../utils/sentEmail"));
 const bcrypt_1 = __importDefault(require("bcrypt"));
@@ -23,7 +23,7 @@ const mongoose_1 = __importDefault(require("mongoose"));
 const EmailCode_1 = __importDefault(require("../models/EmailCode"));
 //GET all-> /users ------------ public EndPoint 
 exports.getAll = (0, catchError_1.catchError)((_req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const user = yield User_1.default.find();
+    const user = yield User_1.default.find().populate('avatar');
     res.json(user);
 }));
 //Post -> /users ------------ public EndPoint 
@@ -68,7 +68,7 @@ exports.getOne = (0, catchError_1.catchError)((req, res) => __awaiter(void 0, vo
         res.status(404).json({ message: 'ID invalid' });
     }
     else {
-        const user = yield User_1.default.findById(id).populate('profesionales');
+        const user = yield User_1.default.findById(id).populate('avatar');
         res.json(user);
     }
 }));
@@ -197,4 +197,14 @@ exports.updatePassword = (0, catchError_1.catchError)((req, res) => __awaiter(vo
     else {
         res.status(404).json({ message: "User not found" });
     }
+}));
+//Set avatar
+exports.setAvatar = (0, catchError_1.catchError)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { id } = req.params;
+    const { avatarId } = req.body;
+    const avatar = yield User_1.default.findByIdAndUpdate({ _id: id }, { avatar: avatarId }, { new: true });
+    if (!avatar)
+        res.status(404).json({ message: "User not found" });
+    if (avatar)
+        res.json(avatar);
 }));
