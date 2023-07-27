@@ -22,6 +22,6 @@ const professionSchema = new Schema<IDisponibilidad>({
 
 });
 
-const ProfessionModel = model<IDisponibilidad>('Profession', professionSchema);
+const ProfessionModel = model<IDisponibilidad>('Disponibilidad', professionSchema);
 
 export default ProfessionModel;

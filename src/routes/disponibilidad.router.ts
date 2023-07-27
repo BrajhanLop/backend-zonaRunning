@@ -1,14 +1,23 @@
 
-import { getAll, create, getOne, update, remove } from '../controllers/disponibilidad.controllers';
+import { getAll, create, getOne, remove, addHour, updateHour, deleteHour } from '../controllers/disponibilidad.controllers';
 import {Router} from 'express'
 
-export const routerService = Router();
+export const routerDisponibilidad = Router();
 
-routerService.route('/')
+routerDisponibilidad.route('/')
     .get(getAll) 
     .post(create) 
 
-routerService.route('/:id')
-    .get(getOne) 
-    .put(update) 
+
+routerDisponibilidad.route('/:id')
     .delete(remove)
+    .get(getOne) 
+
+routerDisponibilidad.route('/addNewHour/:id/:idDate')    
+    .put(addHour) 
+
+routerDisponibilidad.route('/updateHour/:id/:idDate')
+    .put(updateHour)
+
+routerDisponibilidad.route('/deleteHour/:id/:idDate')
+    .put(deleteHour);

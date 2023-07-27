@@ -5,6 +5,7 @@ import { routerProfessionals } from './professionals.router';
 import { routerAvatar } from './avatar.router';
 import { routerClients } from './client.router';
 import { citaRouter } from './cita.router';
+import { routerDisponibilidad } from './disponibilidad.router';
 
 const globalRouter = Router() ;
 
@@ -16,7 +17,7 @@ globalRouter.use("/users", routerUser)
 globalRouter.use("/services", routerService)
 globalRouter.use("/citas", citaRouter)
 globalRouter.use('/avatars', routerAvatar)
-globalRouter.use('/availability');
+globalRouter.use('/availability', routerDisponibilidad);
 
 
 export default globalRouter;
