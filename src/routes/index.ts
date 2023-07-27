@@ -9,20 +9,14 @@ import { citaRouter } from './cita.router';
 const globalRouter = Router() ;
 
 //rutas
-<<<<<<< HEAD
-globalRouter.use('/professionals', routerProfessionals);
-globalRouter.use("/users", routerUser);
-globalRouter.use("/services", routerService);
-globalRouter.use('/avatars', routerAvatar);
-globalRouter.use('/availability');
-=======
+
 globalRouter.use('/professionals', routerProfessionals)
 globalRouter.use('/clients', routerClients )
 globalRouter.use("/users", routerUser)
 globalRouter.use("/services", routerService)
 globalRouter.use("/citas", citaRouter)
 globalRouter.use('/avatars', routerAvatar)
->>>>>>> 296d196c8c6dc9d06ef62bda8e8e8536e6bde21d
+globalRouter.use('/availability');
 
 
 export default globalRouter;
