@@ -25,21 +25,21 @@ export const getOne = catchError(async (req: Request, res: Response) => {
 
 //Post create 
 interface ICreate {
-    date: string;
-    hours: string[];
-    professional: string;
+    dia: string;
+    horas: string[];
+    profesional: string;
 }
 export const create = catchError(async (req: Request, res: Response) => {
-    const { date, hours, professional }: ICreate = req.body;
+    const { dia, horas, profesional }: ICreate = req.body;
 
     const newBody = {
         disponibilidad: [
             {
-                date,
-                hours
+                dia,
+                horas
             }
         ],
-        professional
+        profesional
     }
 
     const disponibilidad = new Disponibilidad(newBody);
