@@ -44,8 +44,6 @@ export const getProfesionalesById = async (req: Request, res: Response): Promise
 
 export const createProfesionales = async (req: Request, res: Response): Promise<void> => {
   try {
-
-
     const nuevoProfesional = new ProfessionModel(req.body);
     console.log(nuevoProfesional);
     const profesionalGuardado = await nuevoProfesional.save();
