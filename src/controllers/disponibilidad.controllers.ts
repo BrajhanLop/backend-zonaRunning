@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { catchError } from '../utils/catchError';
 import Disponibilidad from '../models/Disponibilidad';
+import Cita from '../models/Cita';
 import mongoose from 'mongoose';
 
 //Get all
@@ -23,22 +24,22 @@ export const getOne = catchError(async (req: Request, res: Response) => {
 })
 
 //Post create 
-interface ICreate{
-    dia: string;
-	horas: string[];
-	profesional:string;
+interface ICreate {
+    date: string;
+    hours: string[];
+    professional: string;
 }
 export const create = catchError(async (req: Request, res: Response) => {
-    const {dia, horas, profesional}:ICreate = req.body;
+    const { date, hours, professional }: ICreate = req.body;
 
     const newBody = {
         disponibilidad: [
             {
-                dia,
-                horas
+                date,
+                hours
             }
         ],
-        profesional
+        professional
     }
 
     const disponibilidad = new Disponibilidad(newBody);
@@ -54,44 +55,34 @@ export const create = catchError(async (req: Request, res: Response) => {
 
 //Put addNewHour -->
 interface IAvailability {
-    dia: Date;
-    hora: string[];
+    Hour: string[];
 }
 
 export const addHour = catchError(async (req: Request, res: Response) => {
-    const { id, idDate} = req.params
+    const { id, idDate } = req.params
 
     try {
-        const { dia, hora }: IAvailability = req.body;
+        const { Hour }: IAvailability = req.body;
         const elementMatch = { profesional: id, disponibilidad: { $elemMatch: { _id: idDate } } };
         const disponibilidad = await Disponibilidad.findOne(elementMatch);
 
         if (disponibilidad) {
-            let hour: string[] = disponibilidad.disponibilidad[0].horas;
 
-            hora.forEach(hHoras => {
+            const isDispo = disponibilidad.disponibilidad.findIndex( dispo => dispo._id.toString() === idDate);
+
+            let hour: string[] = disponibilidad.disponibilidad[isDispo].horas;
+
+            Hour.forEach(hHoras => {
 
                 if (hour.indexOf(hHoras) < 0) {
                     hour.push(hHoras);
                 }
             })
 
-            const newBody = {
-                disponibilidad: [
-                    {
-                        dia: new Date(dia),
-                        horas: hour
-                    }
-                ]
-            }
+            disponibilidad.disponibilidad[isDispo].horas = hour;
+            await disponibilidad.save()
 
-            const updateDipo = await Disponibilidad.findOneAndUpdate(elementMatch, newBody, { new: true });
-
-            if (updateDipo) {
-                res.json(updateDipo)
-            } else {
-                res.status(500).json({ error: "Error no se pudo actualizar la disponibilidad" });
-            }
+            res.json(disponibilidad);
 
         } else {
             res.status(404).json({ message: 'Disponibilidad no encontrada' });
@@ -105,111 +96,180 @@ export const addHour = catchError(async (req: Request, res: Response) => {
 })
 
 //update hour 
-interface IUpdateHour{
-    dia: Date;
-    cHora: string;
-    nHora: string;
+interface IUpdateHour {
+    cHour: string;
+    nHour: string;
 }
 
-export const updateHour = catchError(async (req:Request, res:Response)=> {
-  try {
-    const{id, idDate} = req.params;
-    const elementMatch = { profesional: id, disponibilidad: { $elemMatch: { _id: idDate } } };
+export const updateHour = catchError(async (req: Request, res: Response) => {
+    try {
+        const { id, idDate } = req.params;
+        const elementMatch = { profesional: id, disponibilidad: { $elemMatch: { _id: idDate } } };
 
-    const {dia, cHora, nHora}:IUpdateHour = req.body;
+        const { cHour, nHour }: IUpdateHour = req.body;
 
-    const disponibilidad = await Disponibilidad.findOne(elementMatch);
+        const disponibilidad = await Disponibilidad.findOne(elementMatch);
 
-    if(disponibilidad){
-        const hour:string[] = disponibilidad.disponibilidad[0].horas;
+        if (disponibilidad) {
 
-        if(hour.indexOf(cHora) >= 0){   
-            if(hour.indexOf(nHora) < 0){
-                hour.splice(hour.indexOf(cHora),1,nHora);
+            const isDispo = disponibilidad.disponibilidad.findIndex(dispo => dispo._id.toString() === idDate);
+
+            const index = disponibilidad.disponibilidad[isDispo].horas.indexOf(cHour);
+
+            if (index >= 0) {
+
+                disponibilidad.disponibilidad[isDispo].horas.splice(index, 1, nHour);
+                await disponibilidad.save();
+
+                res.json(disponibilidad)
+            } else {
+                res.status(404).json({ error: "La hora no existe en la disponibilidad" });
             }
+
+        } else {
+            res.status(404).json({ error: 'profesional o disponibilidad no encontrada' });
         }
 
-        const newBody = {
-            disponibilidad: [
-                {
-                    dia: new Date(dia),
-                    horas: hour
-                }
-            ]
-        }
-
-        const updateDisponibilidad = await Disponibilidad.findOneAndUpdate(elementMatch,newBody,{new: true});
-
-        if(updateDisponibilidad){
-            res.json(updateDisponibilidad);
-        }else{
-            res.status(404).json({error: 'No se pudo actualizar la hora'});
-        }
-
-    }else{
-        res.status(404).json({error: 'profesional o disponibilidad no encontrada'});
+    } catch (error) {
+        console.error(error)
+        res.sendStatus(500);
     }
 
-  } catch (error) {
-    console.error(error)
-    res.sendStatus(500);
-  }
-    
 })
 
-interface IDeleteHour{
-    dia: Date;
-    Hora: string;
+interface IDeleteHour {
+    Hour: string;
 }
-export const deleteHour = catchError(async (req:Request, res:Response)=> {
+export const deleteHour = catchError(async (req: Request, res: Response) => {
     try {
-      const{id, idDate} = req.params;
-      const elementMatch = { profesional: id, disponibilidad: { $elemMatch: { _id: idDate } } };
-  
-      const {dia, Hora}:IDeleteHour = req.body;
-  
-      const disponibilidad = await Disponibilidad.findOne(elementMatch);
-  
-      if(disponibilidad){
-        
-          const hour:string[] = disponibilidad.disponibilidad[0].horas;
-          const index = hour.indexOf(Hora);
-  
-          let updateDisponibilidad;
-  
-          if(index >= 0){
-            hour.splice(index,1);
-           
-            const newBody = {
-                disponibilidad: [
-                    {
-                        dia: new Date(dia),
-                        horas: hour
-                    }
-                ]
-            }
-    
-             updateDisponibilidad = await Disponibilidad.findOneAndUpdate(elementMatch,newBody,{new: true});
-    
-          }
+        const { id, idDate } = req.params;
+        const elementMatch = { profesional: id, disponibilidad: { $elemMatch: { _id: idDate } } };
 
-          if(updateDisponibilidad){
-              res.json(updateDisponibilidad);
-          }else{
-              res.status(404).json({error: 'No se pudo eliminar la hora | la hora no existe'});
-          }
-  
-      }else{
-          res.status(404).json({error: 'profesional o disponibilidad no encontrada'});
-      }
-  
+        const { Hour }: IDeleteHour = req.body;
+
+        const disponibilidad = await Disponibilidad.findOne(elementMatch);
+
+        if (disponibilidad) {
+
+            const isDispo = disponibilidad.disponibilidad.findIndex(dispo => dispo._id.toString() === idDate);
+
+            const index = disponibilidad.disponibilidad[isDispo].horas.indexOf(Hour);
+
+          
+            if (index >= 0) {
+
+                disponibilidad.disponibilidad[isDispo].horas.splice(index, 1);
+                await disponibilidad.save();
+
+                res.json(disponibilidad)
+            }else{
+                res.status(404).json({error:"La hora no existe en la disponibilidad"})
+            }
+
+        } else {
+            res.status(404).json({ error: 'profesional o disponibilidad no encontrada' });
+        }
+
     } catch (error) {
-      console.error(error)
-      res.sendStatus(500);
+        console.error(error)
+        res.sendStatus(500);
     }
-      
-  })
-  
+
+})
+
+interface ICreateNewAvailability {
+    date: string;
+    hours: string[];
+}
+
+export const createNewAvailability = catchError(async (req: Request, res: Response) => {
+    try {
+        const { id } = req.params;
+
+        const { date, hours }: ICreateNewAvailability = req.body;
+
+        const newBody = { dia: new Date(date), horas: hours }
+
+        const newDisponibilidad = await Disponibilidad.findOneAndUpdate(
+            { profesional: id },
+            { $push: { disponibilidad: newBody } },
+            { new: true });
+
+        if (newDisponibilidad) {
+            res.json(newDisponibilidad);
+        } else {
+            res.status(404).json({ error: 'Disponibilidad no encontrada' })
+        }
+
+    } catch (error) {
+        console.log(error);
+        res.sendStatus(500);
+    }
+
+});
+
+interface ICreateCita {
+    hour: string;
+    comments: string;
+    client: string;
+    service: string;
+}
+
+export const createCita = catchError(async (req: Request, res: Response) => {
+    try {
+        const { id, idDate } = req.params;
+        const elementMatch = { profesional: id, disponibilidad: { $elemMatch: { _id: idDate } } };
+
+        const { hour, comments, client, service }: ICreateCita = req.body;
+
+        const disponibilidad = await Disponibilidad.findOne(elementMatch);
+
+        if (disponibilidad) {
+
+            let isDispo: number = disponibilidad.disponibilidad.findIndex(dispo => dispo._id.toString() === idDate)
+
+            let isHour: number = disponibilidad.disponibilidad[isDispo].horas.indexOf(hour);
+
+            if (isHour >= 0) {
+
+                const date: string = disponibilidad.disponibilidad[isDispo].dia;
+
+                const newBody = {
+                    date,
+                    hour: hour,
+                    comments,
+                    client,
+                    service,
+                    professional: id
+                }
+
+                const cita = new Cita(newBody);
+                await cita.save();
+
+                if (cita) {
+
+                    disponibilidad.disponibilidad[isDispo].horas.splice(isHour, 1);
+                    await disponibilidad.save();
+
+                    res.json(cita);
+
+                } else {
+                    res.status(404).json({ error: "Error al agendar la cita" });
+                }
+
+            } else {
+                res.status(404).json({ error: "La hora no existe en la disponibilidad" })
+            }
+
+        } else {
+            res.status(404).json({ error: "El profesional o la disponibilada no existe" });
+        }
+
+    } catch (error) {
+        console.log(error)
+        res.sendStatus(500);
+    }
+});
 
 //Remove One --> 
 export const remove = catchError(async (req: Request, res: Response) => {

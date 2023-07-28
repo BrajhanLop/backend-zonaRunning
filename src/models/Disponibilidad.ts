@@ -1,8 +1,9 @@
-import { Schema, model, Document } from 'mongoose';
+import { Schema, model, Document, Types } from 'mongoose';
 
 interface IDate {
     dia:string;
     horas: string[];
+    _id: Types.ObjectId;
 }
 
 interface IDisponibilidad extends Document {
