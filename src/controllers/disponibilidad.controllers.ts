@@ -289,3 +289,28 @@ export const remove = catchError(async (req: Request, res: Response) => {
     }
 })
 
+export const deleteAvailability = catchError(async (req: Request, res: Response)=> {
+
+    try {
+        const {id, idDate} = req.params;
+         const elementMatch = { profesional: id, disponibilidad: { $elemMatch: { _id: idDate } } };
+         const disponibilidad = await Disponibilidad.findOne(elementMatch);
+
+         if(disponibilidad){
+            const index:number = disponibilidad.disponibilidad.findIndex(dispo => dispo._id.toString() === idDate);
+            disponibilidad.disponibilidad.splice(index,1);
+            await disponibilidad.save();
+
+            res.json(disponibilidad);
+
+         }else{
+            res.json(404).json({error:'Profesional o disponibilidad no encontrada'});
+         }
+
+
+    } catch (error) {
+        console.log(error);
+        res.sendStatus(500);
+    }
+
+})

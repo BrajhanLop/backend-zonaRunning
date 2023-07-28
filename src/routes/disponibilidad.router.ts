@@ -1,5 +1,5 @@
 
-import { getAll, create, getOne, remove, addHour, updateHour, deleteHour, createNewAvailability, createCita } from '../controllers/disponibilidad.controllers';
+import { getAll, create, getOne, remove, addHour, updateHour, deleteHour, createNewAvailability, createCita, deleteAvailability } from '../controllers/disponibilidad.controllers';
 import {Router} from 'express'
 
 export const routerDisponibilidad = Router();
@@ -23,7 +23,10 @@ routerDisponibilidad.route('/updateHour/:id/:idDate')
     .put(updateHour)
 
 routerDisponibilidad.route('/deleteHour/:id/:idDate')
-    .put(deleteHour);
+    .put(deleteHour)
 
 routerDisponibilidad.route('/createCita/:id/:idDate')
     .post(createCita)
+
+routerDisponibilidad.route('/deleteAvailability/:id/:idDate')
+    .delete(deleteAvailability)
