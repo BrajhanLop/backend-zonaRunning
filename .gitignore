@@ -1,13 +1,6 @@
 .env
 node_modules/
 dist/
-<<<<<<< HEAD
 .env
 uploads
 public
-=======
-
-uploads
-public
-
->>>>>>> 296d196c8c6dc9d06ef62bda8e8e8536e6bde21d
