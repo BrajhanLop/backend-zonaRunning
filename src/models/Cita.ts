@@ -5,7 +5,6 @@ interface ICita extends Document {
   hour: string;
   comments: string;
   client: Schema.Types.ObjectId;
-  service: Schema.Types.ObjectId;
   professional: Schema.Types.ObjectId;
 }
 
@@ -14,7 +13,6 @@ const citaSchema = new Schema<ICita>({
   hour: { type: String, required: true },
   comments: { type: String },
   client: { type: Schema.Types.ObjectId, ref: 'Client', required: true },
-  service: { type: Schema.Types.ObjectId, ref: 'Service', required: true },
   professional: { type: Schema.Types.ObjectId, ref: 'Profession', required: true }
 });
 

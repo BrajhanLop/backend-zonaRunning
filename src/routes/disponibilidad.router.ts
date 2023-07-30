@@ -1,5 +1,5 @@
 
-import { getAll, create, getOne, remove, addHour, updateHour, deleteHour, createNewAvailability, createCita, deleteAvailability } from '../controllers/disponibilidad.controllers';
+import { getAll, create, getOne, remove, addHour, updateHour, deleteHour, createNewAvailability, createCita, deleteAvailability, obtenerDisponibilidadProfesional } from '../controllers/disponibilidad.controllers';
 import {Router} from 'express'
 
 export const routerDisponibilidad = Router();
@@ -8,6 +8,7 @@ routerDisponibilidad.route('/')
     .get(getAll) 
     .post(create) 
 
+routerDisponibilidad.route('/:idprofesional').get(obtenerDisponibilidadProfesional)
 
 routerDisponibilidad.route('/:id')
     .delete(remove)
