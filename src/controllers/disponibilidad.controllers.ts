@@ -3,6 +3,17 @@ import { catchError } from '../utils/catchError';
 import Disponibilidad from '../models/Disponibilidad';
 import Cita from '../models/Cita';
 import mongoose from 'mongoose';
+import { google } from 'googleapis';
+import ProfessionModel from '../models/professionals';
+import User from '../models/User';
+import ClientModel from '../models/Client';
+// import axios from 'axios';
+
+// const SCOPES = ['https://www.googleapis.com/auth/calendar'];
+const CREDENTIALS_PATH = '../api/credenciales.json'; // Ruta al archivo de credenciales de tu proyecto de Google Cloud
+const TOKEN_PATH = '../api/token.json';
+
+
 
 //Get all
 export const getAll = catchError(async (_req: Request, res: Response): Promise<void> => {
@@ -29,8 +40,15 @@ interface ICreate {
     horas: string[];
     profesional: string;
 }
+
+
 export const create = catchError(async (req: Request, res: Response) => {
     const { dia, horas, profesional }: ICreate = req.body;
+
+
+
+    const prof = await Disponibilidad.find({ profesional })
+
 
     const newBody = {
         disponibilidad: [
@@ -42,14 +60,37 @@ export const create = catchError(async (req: Request, res: Response) => {
         profesional
     }
 
-    const disponibilidad = new Disponibilidad(newBody);
-    await disponibilidad.save()
+    if (prof.length === 0) {
 
-    if (!disponibilidad) {
-        res.sendStatus(404)
-    } else {
-        res.status(201).json(disponibilidad);
+
+
+        const disponibilidad = new Disponibilidad(newBody);
+        await disponibilidad.save()
+
+        if (!disponibilidad) {
+            res.sendStatus(404)
+        } else {
+            res.status(201).json(disponibilidad);
+        }
+
     }
+    else {
+
+        res.json({
+            status: false,
+            msg: "la disponibilidad del profesional ya existe, agrege nueva fecha"
+        })
+        //     const disponibilidades = await Disponibilidad.find()
+
+        //     const inde = disponibilidades.findIndex(i => i.profesional.toString() === profesional)
+
+
+
+    }
+
+
+
+
 });
 
 
@@ -68,7 +109,7 @@ export const addHour = catchError(async (req: Request, res: Response) => {
 
         if (disponibilidad) {
 
-            const isDispo = disponibilidad.disponibilidad.findIndex( dispo => dispo._id.toString() === idDate);
+            const isDispo = disponibilidad.disponibilidad.findIndex(dispo => dispo._id.toString() === idDate);
 
             let hour: string[] = disponibilidad.disponibilidad[isDispo].horas;
 
@@ -155,15 +196,15 @@ export const deleteHour = catchError(async (req: Request, res: Response) => {
 
             const index = disponibilidad.disponibilidad[isDispo].horas.indexOf(Hour);
 
-          
+
             if (index >= 0) {
 
                 disponibilidad.disponibilidad[isDispo].horas.splice(index, 1);
                 await disponibilidad.save();
 
                 res.json(disponibilidad)
-            }else{
-                res.status(404).json({error:"La hora no existe en la disponibilidad"})
+            } else {
+                res.status(404).json({ error: "La hora no existe en la disponibilidad" })
             }
 
         } else {
@@ -188,7 +229,7 @@ export const createNewAvailability = catchError(async (req: Request, res: Respon
 
         const { date, hours }: ICreateNewAvailability = req.body;
 
-        const newBody = { dia: new Date(date), horas: hours }
+        const newBody = { dia: date, horas: hours }
 
         const newDisponibilidad = await Disponibilidad.findOneAndUpdate(
             { profesional: id },
@@ -212,7 +253,6 @@ interface ICreateCita {
     hour: string;
     comments: string;
     client: string;
-    service: string;
 }
 
 export const createCita = catchError(async (req: Request, res: Response) => {
@@ -220,9 +260,20 @@ export const createCita = catchError(async (req: Request, res: Response) => {
         const { id, idDate } = req.params;
         const elementMatch = { profesional: id, disponibilidad: { $elemMatch: { _id: idDate } } };
 
-        const { hour, comments, client, service }: ICreateCita = req.body;
+
+
+        const { hour, comments, client }: ICreateCita = req.body;
 
         const disponibilidad = await Disponibilidad.findOne(elementMatch);
+        const profesional = await ProfessionModel.findById(id)
+        const userprofesional = await User.findById(profesional?.user)
+        const correoProfesional: any = userprofesional?.Email
+        // console.log(userprofesional?.Email);
+
+        const cliente = await ClientModel.findById(client)
+        const userCliente = await User.findById(cliente?.user)
+        const correoCliente: any = userCliente?.Email
+        // console.log(cliente);
 
         if (disponibilidad) {
 
@@ -239,9 +290,9 @@ export const createCita = catchError(async (req: Request, res: Response) => {
                     hour: hour,
                     comments,
                     client,
-                    service,
                     professional: id
                 }
+
 
                 const cita = new Cita(newBody);
                 await cita.save();
@@ -250,6 +301,11 @@ export const createCita = catchError(async (req: Request, res: Response) => {
 
                     disponibilidad.disponibilidad[isDispo].horas.splice(isHour, 1);
                     await disponibilidad.save();
+
+                    const auth = await getAuthClient();
+                    await createGoogleEvent(auth, date, hour, comments, correoCliente, correoProfesional);
+
+
 
                     res.json(cita);
 
@@ -269,7 +325,8 @@ export const createCita = catchError(async (req: Request, res: Response) => {
         console.log(error)
         res.sendStatus(500);
     }
-});
+}
+);
 
 //Remove One --> 
 export const remove = catchError(async (req: Request, res: Response) => {
@@ -289,23 +346,23 @@ export const remove = catchError(async (req: Request, res: Response) => {
     }
 })
 
-export const deleteAvailability = catchError(async (req: Request, res: Response)=> {
+export const deleteAvailability = catchError(async (req: Request, res: Response) => {
 
     try {
-        const {id, idDate} = req.params;
-         const elementMatch = { profesional: id, disponibilidad: { $elemMatch: { _id: idDate } } };
-         const disponibilidad = await Disponibilidad.findOne(elementMatch);
+        const { id, idDate } = req.params;
+        const elementMatch = { profesional: id, disponibilidad: { $elemMatch: { _id: idDate } } };
+        const disponibilidad = await Disponibilidad.findOne(elementMatch);
 
-         if(disponibilidad){
-            const index:number = disponibilidad.disponibilidad.findIndex(dispo => dispo._id.toString() === idDate);
-            disponibilidad.disponibilidad.splice(index,1);
+        if (disponibilidad) {
+            const index: number = disponibilidad.disponibilidad.findIndex(dispo => dispo._id.toString() === idDate);
+            disponibilidad.disponibilidad.splice(index, 1);
             await disponibilidad.save();
 
             res.json(disponibilidad);
 
-         }else{
-            res.json(404).json({error:'Profesional o disponibilidad no encontrada'});
-         }
+        } else {
+            res.json(404).json({ error: 'Profesional o disponibilidad no encontrada' });
+        }
 
 
     } catch (error) {
@@ -314,3 +371,76 @@ export const deleteAvailability = catchError(async (req: Request, res: Response)
     }
 
 })
+
+export const obtenerDisponibilidadProfesional = async (req: Request, res: Response): Promise<Response> => {
+    const { idprofesional } = req.params;
+
+    if (!idprofesional.match(/^[0-9a-fA-F]{24}$/)) {
+        return res.status(404).json({
+            status: false,
+            msg: 'not found profesional'
+        })
+    }
+
+    const disponibilidad = await Disponibilidad.findOne({ profesional: idprofesional })
+
+    return res.json(disponibilidad);
+
+};
+
+
+async function getAuthClient() {
+    const credentials = require(CREDENTIALS_PATH);
+    const { client_secret, client_id, redirect_uris } = credentials.installed;
+    const oAuth2Client = new google.auth.OAuth2(client_id, client_secret, redirect_uris[0]);
+
+    try {
+        const token = require(TOKEN_PATH);
+        oAuth2Client.setCredentials(token);
+        return oAuth2Client;
+    } catch (error) {
+        throw new Error('No se pudo obtener el token de acceso. Por favor, autoriza la aplicación.');
+    }
+}
+
+async function createGoogleEvent(auth: any, date: string, hour: string, comments: string, clientEmail: string, professionalEmail: string) {
+    const calendar = google.calendar({ version: 'v3', auth });
+
+    const event = {
+        summary: 'Cita de ZonnaRunning',
+        location: 'Google Meet', // Puedes cambiar esto por la ubicación de tu reunión en línea
+        description: comments,
+        start: {
+            dateTime: `${date}T${hour}:00`,
+            timeZone: 'UTC-5', // Cambia esto por la zona horaria adecuada
+        },
+        end: {
+            dateTime: `${date}T${hour}:30`,
+            timeZone: 'UTC-5', // Cambia esto por la zona horaria adecuada
+        },
+        attendees: [
+            { email: clientEmail },
+            { email: professionalEmail },
+        ],
+        conferenceData: {
+            createRequest: {
+                requestId: 'random-id',
+                conferenceSolutionKey: {
+                    type: 'hangoutsMeet',
+                },
+            },
+        },
+    };
+
+    try {
+        await calendar.events.insert({
+            auth: auth,
+            calendarId: 'primary',
+            requestBody: event,
+            conferenceDataVersion: 1,
+        });
+    } catch (error) {
+        console.log(error);
+
+    }
+}
