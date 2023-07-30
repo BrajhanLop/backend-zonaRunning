@@ -6,7 +6,6 @@ const citaSchema = new mongoose_1.Schema({
     hour: { type: String, required: true },
     comments: { type: String },
     client: { type: mongoose_1.Schema.Types.ObjectId, ref: 'Client', required: true },
-    service: { type: mongoose_1.Schema.Types.ObjectId, ref: 'Service', required: true },
     professional: { type: mongoose_1.Schema.Types.ObjectId, ref: 'Profession', required: true }
 });
 const CitaModel = (0, mongoose_1.model)('Cita', citaSchema);
