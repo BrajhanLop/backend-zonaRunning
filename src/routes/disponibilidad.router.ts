@@ -1,5 +1,5 @@
 
-import { getAll, create, getOne, remove, addHour, updateHour, deleteHour, createNewAvailability, createCita, deleteAvailability, obtenerDisponibilidadProfesional } from '../controllers/disponibilidad.controllers';
+import { getAll, create, getOne, remove, addHour, updateHour, deleteHour, createNewAvailability, createCita, deleteAvailability, obtenerDisponibilidadProfesional, authUrl, getToken } from '../controllers/disponibilidad.controllers';
 import {Router} from 'express'
 
 export const routerDisponibilidad = Router();
@@ -7,6 +7,12 @@ export const routerDisponibilidad = Router();
 routerDisponibilidad.route('/')
     .get(getAll) 
     .post(create) 
+
+routerDisponibilidad.route('/authUrl')
+    .get(authUrl)
+
+routerDisponibilidad.route('/getToken')
+    .get(getToken)
 
 routerDisponibilidad.route('/:idprofesional').get(obtenerDisponibilidadProfesional)
 
