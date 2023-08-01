@@ -7,6 +7,10 @@ exports.routerDisponibilidad = (0, express_1.Router)();
 exports.routerDisponibilidad.route('/')
     .get(disponibilidad_controllers_1.getAll)
     .post(disponibilidad_controllers_1.create);
+exports.routerDisponibilidad.route('/authUrl')
+    .get(disponibilidad_controllers_1.authUrl);
+exports.routerDisponibilidad.route('/getToken')
+    .get(disponibilidad_controllers_1.getToken);
 exports.routerDisponibilidad.route('/:idprofesional').get(disponibilidad_controllers_1.obtenerDisponibilidadProfesional);
 exports.routerDisponibilidad.route('/:id')
     .delete(disponibilidad_controllers_1.remove)

@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.obtenerDisponibilidadProfesional = exports.deleteAvailability = exports.remove = exports.createCita = exports.createNewAvailability = exports.deleteHour = exports.updateHour = exports.addHour = exports.create = exports.getOne = exports.getAll = void 0;
+exports.getToken = exports.authUrl = exports.obtenerDisponibilidadProfesional = exports.deleteAvailability = exports.remove = exports.createCita = exports.createNewAvailability = exports.deleteHour = exports.updateHour = exports.addHour = exports.create = exports.getOne = exports.getAll = void 0;
 const catchError_1 = require("../utils/catchError");
 const Disponibilidad_1 = __importDefault(require("../models/Disponibilidad"));
 const Cita_1 = __importDefault(require("../models/Cita"));
@@ -21,10 +21,8 @@ const googleapis_1 = require("googleapis");
 const professionals_1 = __importDefault(require("../models/professionals"));
 const User_1 = __importDefault(require("../models/User"));
 const Client_1 = __importDefault(require("../models/Client"));
+const oAuth2Client_1 = __importDefault(require("../utils/oAuth2Client"));
 // import axios from 'axios';
-// const SCOPES = ['https://www.googleapis.com/auth/calendar'];
-const CREDENTIALS_PATH = '../api/credenciales.json'; // Ruta al archivo de credenciales de tu proyecto de Google Cloud
-const TOKEN_PATH = '../api/token.json';
 //Get all
 exports.getAll = (0, catchError_1.catchError)((_req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const disponibilidad = yield Disponibilidad_1.default.find();
@@ -48,10 +46,10 @@ exports.create = (0, catchError_1.catchError)((req, res) => __awaiter(void 0, vo
         disponibilidad: [
             {
                 dia,
-                horas
-            }
+                horas,
+            },
         ],
-        profesional
+        profesional,
     };
     if (prof.length === 0) {
         const disponibilidad = new Disponibilidad_1.default(newBody);
@@ -66,7 +64,7 @@ exports.create = (0, catchError_1.catchError)((req, res) => __awaiter(void 0, vo
     else {
         res.json({
             status: false,
-            msg: "la disponibilidad del profesional ya existe, agrege nueva fecha"
+            msg: "la disponibilidad del profesional ya existe, agrege nueva fecha",
         });
         //     const disponibilidades = await Disponibilidad.find()
         //     const inde = disponibilidades.findIndex(i => i.profesional.toString() === profesional)
@@ -76,12 +74,15 @@ exports.addHour = (0, catchError_1.catchError)((req, res) => __awaiter(void 0, v
     const { id, idDate } = req.params;
     try {
         const { Hour } = req.body;
-        const elementMatch = { profesional: id, disponibilidad: { $elemMatch: { _id: idDate } } };
+        const elementMatch = {
+            profesional: id,
+            disponibilidad: { $elemMatch: { _id: idDate } },
+        };
         const disponibilidad = yield Disponibilidad_1.default.findOne(elementMatch);
         if (disponibilidad) {
-            const isDispo = disponibilidad.disponibilidad.findIndex(dispo => dispo._id.toString() === idDate);
+            const isDispo = disponibilidad.disponibilidad.findIndex((dispo) => dispo._id.toString() === idDate);
             let hour = disponibilidad.disponibilidad[isDispo].horas;
-            Hour.forEach(hHoras => {
+            Hour.forEach((hHoras) => {
                 if (hour.indexOf(hHoras) < 0) {
                     hour.push(hHoras);
                 }
@@ -91,7 +92,7 @@ exports.addHour = (0, catchError_1.catchError)((req, res) => __awaiter(void 0, v
             res.json(disponibilidad);
         }
         else {
-            res.status(404).json({ message: 'Disponibilidad no encontrada' });
+            res.status(404).json({ message: "Disponibilidad no encontrada" });
         }
     }
     catch (error) {
@@ -102,11 +103,14 @@ exports.addHour = (0, catchError_1.catchError)((req, res) => __awaiter(void 0, v
 exports.updateHour = (0, catchError_1.catchError)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { id, idDate } = req.params;
-        const elementMatch = { profesional: id, disponibilidad: { $elemMatch: { _id: idDate } } };
+        const elementMatch = {
+            profesional: id,
+            disponibilidad: { $elemMatch: { _id: idDate } },
+        };
         const { cHour, nHour } = req.body;
         const disponibilidad = yield Disponibilidad_1.default.findOne(elementMatch);
         if (disponibilidad) {
-            const isDispo = disponibilidad.disponibilidad.findIndex(dispo => dispo._id.toString() === idDate);
+            const isDispo = disponibilidad.disponibilidad.findIndex((dispo) => dispo._id.toString() === idDate);
             const index = disponibilidad.disponibilidad[isDispo].horas.indexOf(cHour);
             if (index >= 0) {
                 disponibilidad.disponibilidad[isDispo].horas.splice(index, 1, nHour);
@@ -114,11 +118,15 @@ exports.updateHour = (0, catchError_1.catchError)((req, res) => __awaiter(void 0
                 res.json(disponibilidad);
             }
             else {
-                res.status(404).json({ error: "La hora no existe en la disponibilidad" });
+                res
+                    .status(404)
+                    .json({ error: "La hora no existe en la disponibilidad" });
             }
         }
         else {
-            res.status(404).json({ error: 'profesional o disponibilidad no encontrada' });
+            res
+                .status(404)
+                .json({ error: "profesional o disponibilidad no encontrada" });
         }
     }
     catch (error) {
@@ -129,11 +137,14 @@ exports.updateHour = (0, catchError_1.catchError)((req, res) => __awaiter(void 0
 exports.deleteHour = (0, catchError_1.catchError)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { id, idDate } = req.params;
-        const elementMatch = { profesional: id, disponibilidad: { $elemMatch: { _id: idDate } } };
+        const elementMatch = {
+            profesional: id,
+            disponibilidad: { $elemMatch: { _id: idDate } },
+        };
         const { Hour } = req.body;
         const disponibilidad = yield Disponibilidad_1.default.findOne(elementMatch);
         if (disponibilidad) {
-            const isDispo = disponibilidad.disponibilidad.findIndex(dispo => dispo._id.toString() === idDate);
+            const isDispo = disponibilidad.disponibilidad.findIndex((dispo) => dispo._id.toString() === idDate);
             const index = disponibilidad.disponibilidad[isDispo].horas.indexOf(Hour);
             if (index >= 0) {
                 disponibilidad.disponibilidad[isDispo].horas.splice(index, 1);
@@ -141,11 +152,15 @@ exports.deleteHour = (0, catchError_1.catchError)((req, res) => __awaiter(void 0
                 res.json(disponibilidad);
             }
             else {
-                res.status(404).json({ error: "La hora no existe en la disponibilidad" });
+                res
+                    .status(404)
+                    .json({ error: "La hora no existe en la disponibilidad" });
             }
         }
         else {
-            res.status(404).json({ error: 'profesional o disponibilidad no encontrada' });
+            res
+                .status(404)
+                .json({ error: "profesional o disponibilidad no encontrada" });
         }
     }
     catch (error) {
@@ -163,7 +178,7 @@ exports.createNewAvailability = (0, catchError_1.catchError)((req, res) => __awa
             res.json(newDisponibilidad);
         }
         else {
-            res.status(404).json({ error: 'Disponibilidad no encontrada' });
+            res.status(404).json({ error: "Disponibilidad no encontrada" });
         }
     }
     catch (error) {
@@ -174,8 +189,11 @@ exports.createNewAvailability = (0, catchError_1.catchError)((req, res) => __awa
 exports.createCita = (0, catchError_1.catchError)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { id, idDate } = req.params;
-        const elementMatch = { profesional: id, disponibilidad: { $elemMatch: { _id: idDate } } };
-        const { hour, comments, client } = req.body;
+        const elementMatch = {
+            profesional: id,
+            disponibilidad: { $elemMatch: { _id: idDate } },
+        };
+        const { hour, comments, client, code } = req.body;
         const disponibilidad = yield Disponibilidad_1.default.findOne(elementMatch);
         const profesional = yield professionals_1.default.findById(id);
         const userprofesional = yield User_1.default.findById(profesional === null || profesional === void 0 ? void 0 : profesional.user);
@@ -185,37 +203,48 @@ exports.createCita = (0, catchError_1.catchError)((req, res) => __awaiter(void 0
         const userCliente = yield User_1.default.findById(cliente === null || cliente === void 0 ? void 0 : cliente.user);
         const correoCliente = userCliente === null || userCliente === void 0 ? void 0 : userCliente.Email;
         // console.log(cliente);
-        if (disponibilidad) {
-            let isDispo = disponibilidad.disponibilidad.findIndex(dispo => dispo._id.toString() === idDate);
-            let isHour = disponibilidad.disponibilidad[isDispo].horas.indexOf(hour);
-            if (isHour >= 0) {
-                const date = disponibilidad.disponibilidad[isDispo].dia;
-                const newBody = {
-                    date,
-                    hour: hour,
-                    comments,
-                    client,
-                    professional: id
-                };
-                const cita = new Cita_1.default(newBody);
-                yield cita.save();
-                if (cita) {
-                    disponibilidad.disponibilidad[isDispo].horas.splice(isHour, 1);
-                    yield disponibilidad.save();
-                    const auth = yield getAuthClient();
-                    yield createGoogleEvent(auth, date, hour, comments, correoCliente, correoProfesional);
-                    res.json(cita);
+        if (!code) {
+            res
+                .status(400)
+                .json({ error: "Faltan campos requeridos en los parámetros." });
+        }
+        else {
+            if (disponibilidad) {
+                let isDispo = disponibilidad.disponibilidad.findIndex((dispo) => dispo._id.toString() === idDate);
+                let isHour = disponibilidad.disponibilidad[isDispo].horas.indexOf(hour);
+                if (isHour >= 0) {
+                    const date = disponibilidad.disponibilidad[isDispo].dia;
+                    const newBody = {
+                        date,
+                        hour: hour,
+                        comments,
+                        client,
+                        professional: id,
+                    };
+                    const cita = new Cita_1.default(newBody);
+                    yield cita.save();
+                    if (cita) {
+                        disponibilidad.disponibilidad[isDispo].horas.splice(isHour, 1);
+                        yield disponibilidad.save();
+                        const auth = yield getAuthClient(code);
+                        yield createGoogleEvent(auth, date, hour, comments, correoCliente, correoProfesional);
+                        res.json(cita);
+                    }
+                    else {
+                        res.status(404).json({ error: "Error al agendar la cita" });
+                    }
                 }
                 else {
-                    res.status(404).json({ error: "Error al agendar la cita" });
+                    res
+                        .status(404)
+                        .json({ error: "La hora no existe en la disponibilidad" });
                 }
             }
             else {
-                res.status(404).json({ error: "La hora no existe en la disponibilidad" });
+                res
+                    .status(404)
+                    .json({ error: "El profesional o la disponibilada no existe" });
             }
-        }
-        else {
-            res.status(404).json({ error: "El profesional o la disponibilada no existe" });
         }
     }
     catch (error) {
@@ -223,7 +252,7 @@ exports.createCita = (0, catchError_1.catchError)((req, res) => __awaiter(void 0
         res.sendStatus(500);
     }
 }));
-//Remove One --> 
+//Remove One -->
 exports.remove = (0, catchError_1.catchError)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { id } = req.params;
     if (!mongoose_1.default.isValidObjectId(id)) {
@@ -242,16 +271,21 @@ exports.remove = (0, catchError_1.catchError)((req, res) => __awaiter(void 0, vo
 exports.deleteAvailability = (0, catchError_1.catchError)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { id, idDate } = req.params;
-        const elementMatch = { profesional: id, disponibilidad: { $elemMatch: { _id: idDate } } };
+        const elementMatch = {
+            profesional: id,
+            disponibilidad: { $elemMatch: { _id: idDate } },
+        };
         const disponibilidad = yield Disponibilidad_1.default.findOne(elementMatch);
         if (disponibilidad) {
-            const index = disponibilidad.disponibilidad.findIndex(dispo => dispo._id.toString() === idDate);
+            const index = disponibilidad.disponibilidad.findIndex((dispo) => dispo._id.toString() === idDate);
             disponibilidad.disponibilidad.splice(index, 1);
             yield disponibilidad.save();
             res.json(disponibilidad);
         }
         else {
-            res.json(404).json({ error: 'Profesional o disponibilidad no encontrada' });
+            res
+                .json(404)
+                .json({ error: "Profesional o disponibilidad no encontrada" });
         }
     }
     catch (error) {
@@ -264,52 +298,49 @@ const obtenerDisponibilidadProfesional = (req, res) => __awaiter(void 0, void 0,
     if (!idprofesional.match(/^[0-9a-fA-F]{24}$/)) {
         return res.status(404).json({
             status: false,
-            msg: 'not found profesional'
+            msg: "not found profesional",
         });
     }
-    const disponibilidad = yield Disponibilidad_1.default.findOne({ profesional: idprofesional });
+    const disponibilidad = yield Disponibilidad_1.default.findOne({
+        profesional: idprofesional,
+    });
     return res.json(disponibilidad);
 });
 exports.obtenerDisponibilidadProfesional = obtenerDisponibilidadProfesional;
-function getAuthClient() {
+function getAuthClient(code) {
     return __awaiter(this, void 0, void 0, function* () {
-        const credentials = require(CREDENTIALS_PATH);
-        const { client_secret, client_id, redirect_uris } = credentials.installed;
-        const oAuth2Client = new googleapis_1.google.auth.OAuth2(client_id, client_secret, redirect_uris[0]);
+        const { tokens } = yield oAuth2Client_1.default.getToken(code);
+        oAuth2Client_1.default.setCredentials(tokens);
         try {
-            const token = require(TOKEN_PATH);
-            oAuth2Client.setCredentials(token);
-            return oAuth2Client;
+            oAuth2Client_1.default.setCredentials(tokens);
+            return oAuth2Client_1.default;
         }
         catch (error) {
-            throw new Error('No se pudo obtener el token de acceso. Por favor, autoriza la aplicación.');
+            throw new Error("No se pudo obtener el token de acceso. Por favor, autoriza la aplicación.");
         }
     });
 }
 function createGoogleEvent(auth, date, hour, comments, clientEmail, professionalEmail) {
     return __awaiter(this, void 0, void 0, function* () {
-        const calendar = googleapis_1.google.calendar({ version: 'v3', auth });
+        const calendar = googleapis_1.google.calendar({ version: "v3", auth });
         const event = {
-            summary: 'Cita de ZonnaRunning',
-            location: 'Google Meet',
+            summary: "Cita de ZonnaRunning",
+            location: "Google Meet",
             description: comments,
             start: {
                 dateTime: `${date}T${hour}:00`,
-                timeZone: 'UTC-5', // Cambia esto por la zona horaria adecuada
+                timeZone: "UTC-5", // Cambia esto por la zona horaria adecuada
             },
             end: {
                 dateTime: `${date}T${hour}:30`,
-                timeZone: 'UTC-5', // Cambia esto por la zona horaria adecuada
+                timeZone: "UTC-5", // Cambia esto por la zona horaria adecuada
             },
-            attendees: [
-                { email: clientEmail },
-                { email: professionalEmail },
-            ],
+            attendees: [{ email: clientEmail }, { email: professionalEmail }],
             conferenceData: {
                 createRequest: {
-                    requestId: 'random-id',
+                    requestId: "random-id",
                     conferenceSolutionKey: {
-                        type: 'hangoutsMeet',
+                        type: "hangoutsMeet",
                     },
                 },
             },
@@ -317,7 +348,7 @@ function createGoogleEvent(auth, date, hour, comments, clientEmail, professional
         try {
             yield calendar.events.insert({
                 auth: auth,
-                calendarId: 'primary',
+                calendarId: "primary",
                 requestBody: event,
                 conferenceDataVersion: 1,
             });
@@ -327,3 +358,21 @@ function createGoogleEvent(auth, date, hour, comments, clientEmail, professional
         }
     });
 }
+exports.authUrl = (0, catchError_1.catchError)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const scopes = ["https://www.googleapis.com/auth/calendar"];
+    const authorizeUrl = oAuth2Client_1.default.generateAuthUrl({
+        access_type: "offline",
+        scope: scopes,
+    });
+    res.redirect(authorizeUrl);
+}));
+exports.getToken = (0, catchError_1.catchError)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const code = req.query.code;
+    try {
+        res.json({ code });
+    }
+    catch (err) {
+        console.error("Error al obtener el token:", err);
+        res.status(500).json({ error: "Error al obtener el token" });
+    }
+}));
