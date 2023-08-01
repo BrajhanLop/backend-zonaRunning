@@ -19,13 +19,14 @@ app.use(
 app.use(cors());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/api/v1', globalRouter);
-app.get("/", (_req:Request, res:Response) => {
-        return res.send("Welcome to express")
+app.get("/", async(req:Request, res:Response) => {
+    const {
+        code
+    } = req.query;
+   res.redirect(`/api/v1/availability/getToken?code=${code}`);
 })
 
 //Middlewares despues de las rutas
 app.use(errorHandler)
-
-
 
 export default app;
