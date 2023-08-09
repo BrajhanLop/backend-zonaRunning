@@ -8,7 +8,6 @@ import path from 'path';
 //esta es nuestra aplicacion
 const app = express();
 
-
 //middlewares
 app.use(express.json());
 app.use(
