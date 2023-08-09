@@ -249,12 +249,7 @@ export const createCita = catchError(async (req: Request, res: Response) => {
       disponibilidad: { $elemMatch: { _id: idDate } },
     };
 
-    const {
-      hour,
-      comments,
-      client,
-      code
-    }: ICreateCita = req.body;
+    const { hour, comments, client, code }: ICreateCita = req.body;
 
     const disponibilidad = await Disponibilidad.findOne(elementMatch);
     const profesional = await ProfessionModel.findById(id);
@@ -296,7 +291,7 @@ export const createCita = catchError(async (req: Request, res: Response) => {
           if (cita) {
             disponibilidad.disponibilidad[isDispo].horas.splice(isHour, 1);
             await disponibilidad.save();
-           
+
             const auth = await getAuthClient(code);
             await createGoogleEvent(
               auth,
@@ -396,9 +391,8 @@ export const obtenerDisponibilidadProfesional = async (
 };
 
 async function getAuthClient(code: string) {
- 
   const { tokens } = await oAuth2Client.getToken(code);
-    oAuth2Client.setCredentials(tokens);
+  oAuth2Client.setCredentials(tokens);
 
   try {
     oAuth2Client.setCredentials(tokens);
@@ -467,11 +461,37 @@ export const authUrl = catchError(async (req: Request, res: Response) => {
 
 export const getToken = catchError(async (req: Request, res: Response) => {
   const code = req.query.code as string;
+  const { tokens } = await oAuth2Client.getToken(code);
 
   try {
-    res.json({ code});
+    res.json({ tokens });
   } catch (err) {
     console.error("Error al obtener el token:", err);
     res.status(500).json({ error: "Error al obtener el token" });
   }
 });
+
+
+export const loginGoogle = catchError(async (req:Request, res: Response) => {
+  
+  try{
+    const token = req.query.token as string;
+
+    const tokens =  {
+      access_token: "",
+      refresh_token: "1//05Gqu9k4b8kfECgYIARAAGAUSNwF-L9IrB2t61s9c8dyC_HO1yu7223v4FkvzqierkEpxmj1zzoM4yqwXohNKvokYKyW_8Bv955M",
+      scope: "https://www.googleapis.com/auth/calendar",
+      token_type: "Bearer",
+      expiry_date: 1691125235124
+    }
+
+    oAuth2Client.setCredentials(tokens);
+
+    res.json({message:"Usuario logeado"})
+
+  }catch(error){
+    res.status(500).json({error:"Code not found"})
+  }
+    
+});
+
