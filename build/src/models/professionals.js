@@ -7,6 +7,7 @@ const professionSchema = new mongoose_1.Schema({
     titulo: { type: String, required: true },
     descripcion: { type: String, required: true },
     user: { type: mongoose_1.Schema.Types.ObjectId, ref: 'User', required: true },
+    source: { type: String, required: true },
     duracion: { type: String, required: true },
     disponibilidad: { type: mongoose_1.Schema.Types.ObjectId, ref: 'Disponibilidad' }
 });
