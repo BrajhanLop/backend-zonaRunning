@@ -89,7 +89,11 @@ export const getOne = catchError(async (req: Request, res: Response) => {
 
         const user = await User.findById(id).populate('avatar');
         res.json(user)
+
     }
+
+
+
 })
 
 

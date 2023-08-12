@@ -4,7 +4,6 @@ import cors from 'cors';
 import globalRouter from './routes';
 import errorHandler  from './utils/errorHandler';
 import path from 'path';
-import fileupload from 'express-fileupload';
 import * as dotenv from "dotenv";
 dotenv.config();
 
@@ -12,9 +11,6 @@ dotenv.config();
 const app = express();
 
 //middlewares
-app.use(
-    fileupload()
-);
 app.use(express.json());
 app.use(
     helmet({

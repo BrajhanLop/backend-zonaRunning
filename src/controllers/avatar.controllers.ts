@@ -2,7 +2,6 @@ import Avatar from '../models/Avatar';
 import { catchError } from '../utils/catchError';
 import { Request, Response } from 'express'
 import { uploadToCloudinary, deleteFromCloudinary } from '../utils/cloudinary';
-import fileUpload from 'express-fileupload';
 
 export const getAll = catchError(async (_req: Request, res: Response) => {
 
@@ -15,13 +14,12 @@ export const getAll = catchError(async (_req: Request, res: Response) => {
 
 export const create = catchError(async (req: Request, res: Response) => {
 
-    if (req.files || Object.keys(req.files).length !== 0) {
+    if (req.file) {
 
-                      
-            const file = req.files.sampleFile as fileUpload.UploadedFile;
-
+        if (req.file.filename) {
+            const { path, filename } = req.file;
             const images = await uploadToCloudinary(
-                file.tempFilePath, file.name
+                path, filename
             )
 
             if (images) {
@@ -33,10 +31,15 @@ export const create = catchError(async (req: Request, res: Response) => {
                 await image.save();
 
                 res.status(201).json(image)
-            }   
-    }else{
-        res.sendStatus(500);
+            }
+
+        } else {
+            res.status(404)
+        }
+
     }
+
+
 })
 
 export const remove = catchError(async (req: Request, res: Response) => {
