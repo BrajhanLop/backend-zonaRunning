@@ -11,7 +11,7 @@ interface CustomRequest extends Request {
         habilitado?: boolean;
         __v?: number;
     };
-}
+} 
 
 const verifyJWT = (req: CustomRequest, res: Response, next: NextFunction): void => {
 
