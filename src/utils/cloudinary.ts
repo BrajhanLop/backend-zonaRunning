@@ -1,9 +1,6 @@
 import {v2, UploadApiResponse} from 'cloudinary';
 import fs from 'fs';
 import path from 'path';
-import dotenv from "dotenv"
-
-dotenv.config()
 
 const cloudinary = v2
 
@@ -33,7 +30,6 @@ export const uploadToCloudinary = async (localFilePath:string, filename:string):
 }
 
 export const deleteFromCloudinary = async (publicId:string):Promise<{message: string}> => {
-
     try {
         await cloudinary.uploader.destroy(publicId)
 

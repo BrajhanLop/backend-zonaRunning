@@ -4,12 +4,9 @@ interface EmailOptions{
     to:string;
     subject:string;
     html:string;
-
 }
 
 const sendEmail = async (options:EmailOptions): Promise<any> => new Promise((resolve, reject)=>{
-
-   
  const transporter = nodemailer.createTransport({
     service:"gmail",
     auth:{
@@ -32,13 +29,10 @@ const sendEmail = async (options:EmailOptions): Promise<any> => new Promise((res
         if(error){
             console.log(error);
             return reject({message:"An error has occured"})
-            
         }
         return resolve({message:"Email sent successfully"})
- })
-
-})
-
+ });
+});
 
 export default sendEmail;
 

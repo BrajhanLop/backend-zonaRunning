@@ -4,6 +4,8 @@ import cors from 'cors';
 import globalRouter from './routes';
 import errorHandler  from './utils/errorHandler';
 import path from 'path';
+import * as dotenv from "dotenv";
+dotenv.config();
 
 //esta es nuestra aplicacion
 const app = express();

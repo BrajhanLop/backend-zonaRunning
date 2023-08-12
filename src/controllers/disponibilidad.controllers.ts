@@ -455,7 +455,7 @@ async function createGoogleEvent(
   }
 }
 
-export const authUrl = catchError(async (req: Request, res: Response) => {
+export const authUrl = (req: Request, res: Response) => {
   const scopes = ["https://www.googleapis.com/auth/calendar"];
 
   const authorizeUrl = oAuth2Client.generateAuthUrl({
@@ -463,7 +463,7 @@ export const authUrl = catchError(async (req: Request, res: Response) => {
     scope: scopes,
   });
   res.redirect(authorizeUrl);
-});
+};
 
 export const getToken = catchError(async (req: Request, res: Response) => {
   const code = req.query.code as string;
