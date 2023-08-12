@@ -41,13 +41,11 @@ const cors_1 = __importDefault(require("cors"));
 const routes_1 = __importDefault(require("./routes"));
 const errorHandler_1 = __importDefault(require("./utils/errorHandler"));
 const path_1 = __importDefault(require("path"));
-const express_fileupload_1 = __importDefault(require("express-fileupload"));
 const dotenv = __importStar(require("dotenv"));
 dotenv.config();
 //esta es nuestra aplicacion
 const app = (0, express_1.default)();
 //middlewares
-app.use((0, express_fileupload_1.default)());
 app.use(express_1.default.json());
 app.use((0, helmet_1.default)({
     crossOriginEmbedderPolicy: false

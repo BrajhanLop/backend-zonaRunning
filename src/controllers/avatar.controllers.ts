@@ -14,30 +14,30 @@ export const getAll = catchError(async (_req: Request, res: Response) => {
 
 export const create = catchError(async (req: Request, res: Response) => {
 
-    if (req.file) {
+    // if (req.file) {
 
-        if (req.file.filename) {
-            const { path, filename } = req.file;
-            const images = await uploadToCloudinary(
-                path, filename
-            )
+    //     if (req.file.filename) {
+    //         const { path, filename } = req.file;
+    //         const images = await uploadToCloudinary(
+    //             path, filename
+    //         )
 
-            if (images) {
-                const { url, public_id } = images;
+    //         if (images) {
+    //             const { url, public_id } = images;
 
-                const body = { url, filename: public_id };
+    //             const body = { url, filename: public_id };
 
-                const image = new Avatar(body);
-                await image.save();
+    //             const image = new Avatar(body);
+    //             await image.save();
 
-                res.status(201).json(image)
-            }
+    //             res.status(201).json(image)
+    //         }
 
-        } else {
-            res.status(404)
-        }
+    //     } else {
+    //         res.status(404)
+    //     }
 
-    }
+    // }
 
 
 })
